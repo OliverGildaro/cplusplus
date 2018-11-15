@@ -142,7 +142,85 @@ public:
             }
             return j;
       }
+
+      size_t count_caracter(const char* word)
+      {
+            size_t count=0;
+            while(*word++)
+            {
+                  count++;
+            }
+            return count;
+      }
+
+      size_t get_letter_count(bool(*FUNCTION)(char))
+      {
+           node* cursor = first;
+            
+            size_t count_dig = 0;
+            while(cursor){
+                  size_t c = count_caracter(cursor->word);
+                  size_t i=0;
+                  do{
+                        if(FUNCTION(cursor->word[i]))
+                              count_dig++;
+                        i++;
+                  }while(i < c);
+                  cursor = cursor->next;
+            }
+            return count_dig;           
+      }
+
+      size_t get_digit_count(bool(*FUNCTION)(char))
+      {
+            node* cursor = first;
+            
+            size_t count_dig = 0;
+            while(cursor){
+                  size_t c = count_caracter(cursor->word);
+                  size_t i=0;
+                  do{
+                        if(FUNCTION(cursor->word[i]))
+                              count_dig++;
+                        i++;
+                  }while(i < c);
+                  cursor = cursor->next;
+            }
+            return count_dig;
+      }
 };
+
+bool verif_digit(char digit)
+{
+      bool band = false;
+      const char* abc = "0123456789";
+      while(*abc)
+      {
+            if(*abc == digit)
+            {
+                  band = true;
+                  return band;
+            }
+            abc++;
+      }
+      return band;
+}
+
+bool verif_letters(char letter)
+{
+      bool band = false;
+      const char* abc = "abcdefghijklmnopqrstuvwxyz";
+      while(*abc)
+      {
+            if(*abc == letter)
+            {
+                  band = true;
+                  return band;
+            }
+            abc++;
+      }
+      return band;
+}
 
 class text_processor
 {
@@ -185,6 +263,16 @@ public:
       {
             return list.get_char_count();
       }
+
+      size_t get_letter_count()
+      {
+            return list.get_letter_count(verif_letters);
+      }
+
+      size_t get_digit_count()
+      {
+            return list.get_digit_count(verif_digit);
+      }
 };
 
 int main()
@@ -200,10 +288,15 @@ int main()
     cout << "5 points\n\n";
 
     cout << ts.get_char_count() << "\n";//contar cuantos tipos de caracteres existe en la lista
-    cout << "10 points\n";
+    cout << "10 points\n\n";
 
-//     cout << ts.get_letter_count() << "\n";
-//     cout << ts.get_digit_count() << "\n";
+    cout << ts.get_letter_count() << "\n";//contar cuantas letras existe
+    cout << "10 points\n\n";
+
+    cout << ts.get_digit_count() << "\n";
+    cout << "10 points\n\n";
+
+
 //     cout << ts.get_word_count() << "\n";
 //     cout << ts.get_frequency_by_word("emulator") << "\n";
 //     cout << ts.get_frequency_by_word("atari") << "\n";
