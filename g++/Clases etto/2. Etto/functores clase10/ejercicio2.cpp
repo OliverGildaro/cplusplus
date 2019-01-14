@@ -46,9 +46,9 @@ int main()
 	msort(6,9,cint);
 	puts("xxx");
 	msort("hola"s,"amigos"s,cstr);
-	mcomp<int>c1{true};
+	mcomp<int> c1{true};
 	msort(16,14,c1);
-	mcomp<string>c2{false};
+	mcomp<string> c2{false};
 	msort("gatos"s,"perros"s,c2);
 }
 
