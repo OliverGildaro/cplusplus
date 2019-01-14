@@ -4,6 +4,7 @@
 #include<string>
 
 using namespace std;
+
 template<class T/*v2*/,class PRED>
 void show(const T* arr,size_t n,/*bool(*pred)(const T&)->v2*/ PRED pred)
 {

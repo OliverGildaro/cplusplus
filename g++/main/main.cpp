@@ -1,226 +1,172 @@
 #include <iostream>
-#include <string>
 #include <cstring>
-
 using namespace std;
 
-#define A "\""
-#define B "\\"
+const char *abcd = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+-*/.";
 
-struct json_null
+const char* SUM = "+";
+const char* RES = "-";
+const char* MUL = "*";
+const char* DIV = "/";
+#define o_sum "+"
+
+
+enum class CalculatorType
 {
-      string to_string()
-      {
-            return "null";
-      }
+    RPN
 };
-
-struct json_number
-{
-      int n;
-
-      string to_string()
-      {
-            return std::to_string(n);
-      }
-};
-
-struct json_bool
-{
-      bool band;
-      string aux_band;
-
-      string to_string()
-      {
-            if(band == true)
-            {
-                  aux_band = "true";
-            }
-            else
-                  aux_band = "false";
-            return aux_band;
-      }
-};
-
-
-
-struct node
-{
-      string word;
-};
-
 
 class f_array
 {
 private:
-      size_t size_memory;
-      size_t count;
-      node* array;
-      string res_string;
+    char** objects;
+    size_t len;
 public:
-      f_array(/* args */)
-      :size_memory{4}, count{0}, array{new node[size_memory]} { }
-      ~f_array() { }
+    f_array()
+    :objects{(char**) malloc(0)}, len{0} { }
+    ~f_array() { }
 
-      void push_back(string& new_word)
-      {
-            node* new_node = new node{new_word};
-            array[count++] = *new_node;
-      }
+    void add_caracter(char* obj)
+    {
+        objects = (char**) realloc(objects, (len+1)*sizeof(char*));
+        objects[len++] = obj;
+    }
+    
+    size_t size() const
+    {
+        return len;
+    }
 
-      string to_string()
-      {
-            size_t c_count=0;
-            if(count>2)
-            {
-
-                  "my name is \"Michael\""
-            }
-            else
-            {
-                  res_string = A + array[c_count].word + ;
-            }
-      }
+    const char* operator[](size_t position)
+    {
+        return objects[position];
+    }
 };
 
-class json_string
+class f_tokenizer
 {
 private:
-      string value;
-      size_t len;
-      f_array array;
-      string real_value;
+    size_t len;
+    size_t len_abc;
+    char* tok;
+    size_t pos_init;
+    f_array array_tokens;
 public:
-      json_string(const char* p_value)
-      : value{p_value} 
-      {
-            tokenizer(value);
-      }
-      ~json_string() { }
+    f_tokenizer(/* args */) { }
+    ~f_tokenizer() { }
 
-      void tokenizer(string value)
-      {
-            char * writable = new char[value.size() + 1];
-            std::copy(value.begin(), value.end(), writable);
-            writable[value.size()] = '\0';
+    bool is_letter(char letter)
+    {
+        len_abc = strlen(abcd);
 
-            char* tok = strtok(writable, " \"\\");
+        for (size_t i = 0; i < len_abc; i++)
+        {
+            if (letter == abcd[i])
+                return true;
+        }
+        return false;
+    }
 
-            while(tok)
+    void tokenizer(const char *txt)
+    {
+        len = strlen(txt);
+        size_t count_letter = 0;
+        for (size_t i = 0; i < len; i++)
+        {
+            if (is_letter(txt[i]) == true)
             {
-                  real_value = tok;
-                  array.push_back(real_value);
-                  tok = strtok(nullptr, " \"\\");
-            }
-      }
+                pos_init = i;
+                do
+                    count_letter++;
+                while (is_letter(txt[++i]));
 
-      string to_string()
-      {
-            return array.to_string();
-      }
+                tok = new char[count_letter + 1];
+
+                for (size_t i = 0; i < count_letter; i++)
+                    tok[i] = txt[pos_init++];
+                tok[count_letter] = 0;
+            }
+            array_tokens.add_caracter(tok);
+            count_letter = 0;
+        }
+    }
 };
 
-bool test0()
+class ICalculator
 {
-    json_null j;
-    return j.to_string() == "null";
-}
+private:
+    f_tokenizer token;
+    f_array array_tokens;
+    double res;
+public:
+    ICalculator() {}
+    ~ICalculator() {}
 
-bool test1()
+    void sumar(size_t position)
+    {
+        cout << array_tokens[position] << "\n";
+    }
+
+    double eval(const char* value)
+    {
+        token.tokenizer(value);
+        
+        for(size_t i = 0; i < array_tokens.size(); i++)
+        {
+                cout << array_tokens[i] << "\n";
+            if(array_tokens[i] == o_sum)
+            {
+                sumar(i);
+            }
+        }
+        
+    }
+};
+
+class CalculatorFactory : public ICalculator
 {
-    json_number j { 125 };
-    return j.to_string() == "125";
-}
+  private:
+  public:
+    CalculatorFactory() {}
+    ~CalculatorFactory() {}
 
-bool test2()
+    ICalculator *create_calculator(const CalculatorType &op)
+    {
+        switch (op)
+        {
+        case CalculatorType::RPN:
+            return new ICalculator{};
+        default:
+            break;
+        }
+        return nullptr;
+    }
+};
+
+void show(double res)
 {
-    json_bool j { true };
-    json_bool k { false };
-    return j.to_string() == "true" && k.to_string() == "false";
+    cout << res << "\n";
 }
-
-bool test3()
-{
-    json_string j { "hello world" };
-//     return j.to_string() == "\"hello world\""; 
-}
-
-// bool test4()
-// {
-//     json_string j = "my name is \"Michael\"";
-//     return j.to_string() == "\"my name is \\\"Michael\\\"\"";
-// }
-
-// bool test5()
-// {
-//     json_object j;
-//     return j.to_string() == "{ }";
-// }
-
-// bool test6()
-// {
-//     json_array ja;
-//     ja.add(true);
-//     ja.add("hello world"s);
-//     ja.add(237);
-//     return ja.to_string() == "[true, \"hello world\", 237]";
-// }
-
-// bool test7()
-// {
-//     json_object jo;
-//     jo.add("first_name", "juan");
-//     jo.add("last_name", "perez");
-//     jo.add("birth_year", 1970);
-//     return jo.to_string() == "{ \"first_name\" : \"juan\", \"last_name\" : \"perez\", \"birth_year\" : 1970 }";
-// }
-
-// bool test8()
-// {
-//     json_array ja;
-
-//     json_object jo1;
-//     jo1.add("first_name", "juan");
-//     jo1.add("last_name", "perez");
-//     jo1.add("birth_year", 1970);
-
-//     json_object jo2;
-//     jo2.add("first_name", "omar");
-//     jo2.add("last_name", "vera");
-//     jo2.add("birth_year", 1995);
-
-//     ja.add(jo1).add(jo2);
-
-//     return ja.to_string() == "[{ \"first_name\" : \"juan\", \"last_name\" : \"perez\", \"birth_year\" : 1970 }, { \"first_name\" : \"omar\", \"last_name\" : \"vera\", \"birth_year\" : 1995 }]";
-// }
-
-// bool test9()
-// {
-//     json_object jo;
-//     jo.add("marca", "volkswagen");
-//     jo.add("modelos", json_array {}.add("jetta").add("new beetle").add("golf"));
-//     jo.add("descripcion", json_object {}.add("pais", "alemania").add("produccion_anual", 50000));
-//     return jo.to_string() == "{ \"marca\" : \"volkswagen\", \"modelos\" : [\"jetta\", \"new beetle\", \"golf\"], \"descripcion\" : { \"pais\" : \"alemania\", \"produccion_anual\" : 50000 } }";
-// }
-
-
 
 int main()
 {
-    auto score = 0.0;
+    CalculatorFactory cf;
+    ICalculator *calc = cf.create_calculator(CalculatorType::RPN);
 
-    score += 0.5 * static_cast<double>(test0());
-    score += 0.5 * static_cast<double>(test1());
-    score += 0.5 * static_cast<double>(test2());
-    score += 0.5 * static_cast<double>(test3());
-//     score += 0.5 * static_cast<double>(test4());
-//     score += 0.5 * static_cast<double>(test5());
-//     score += 1.6 * static_cast<double>(test6());
-//     score += 1.7 * static_cast<double>(test7());
-//     score += 1.8 * static_cast<double>(test8());
-//     score += 1.9 * static_cast<double>(test9());
+    show(calc->eval("2 3 +"));             // 5
+    // show(calc->eval("100 12.5 13.7 * -")); // 67.825
+    // show(calc->eval("5 6 7 8 + - * 5 +")); // 50
+    // show(calc->eval("6 inc"));             // [Error: operator 'inc' unknown]
+    // show(calc->eval("7 2 max"));           // [Error: operator 'max' unknown]
+    // show(calc->eval("7 *"));               // [Error: no operand found for '*']
+    // show(calc->eval("+"));                 // [Error: no operand found for '+']
+    // show(calc->eval("abc"));               // [Error: operator 'abc' unknown]
+    // show(calc->eval("12x6"));              // [Error: syntax error]
 
-    cout << score * 10 << " / 100\n";
+    // calc->add_operator("inc", new IncOperator());
+    // calc->add_operator("max", new MaxOperator());
+    // calc->add_operator("sqrt", new SqrtOperator());
 
-    return 0;
+    // show(calc->eval("10 5 max inc")); // 11
+    // show(calc->eval("25.8 63 max inc sqrt")); // 8
 }
